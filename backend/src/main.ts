@@ -18,6 +18,8 @@ async function bootstrap() {
 
     app.enableCors(); // Metalens frontend needs to call this
     app.useGlobalPipes(new ValidationPipe());
-    await app.listen(3000);
+    const port = process.env.PORT || 3000;
+    await app.listen(port);
+    console.log(`[Backend] Application is running on: http://localhost:${port}`);
 }
 bootstrap();

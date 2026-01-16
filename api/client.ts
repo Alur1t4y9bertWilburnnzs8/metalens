@@ -49,7 +49,8 @@ apiClient.interceptors.response.use(
 
         // 返回错误信息
         const message = error.response?.data?.message || error.message || '请求失败';
-        return Promise.reject(new Error(message));
+        error.message = message;
+        return Promise.reject(error);
     }
 );
 
