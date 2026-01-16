@@ -9,6 +9,7 @@ import { AlbumsModule } from './albums/albums.module';
 import { PhotosModule } from './photos/photos.module';
 import { UsersModule } from './users/users.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AppController } from './app.controller';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
         UsersModule,
         NotificationsModule,
     ],
+    controllers: [AppController],
 })
 export class AppModule { }
 
