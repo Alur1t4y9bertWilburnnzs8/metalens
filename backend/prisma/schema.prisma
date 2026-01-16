@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id                String         @id @default(uuid())
+  userId            String         @unique @map("user_id")
+  username          String         @unique
+  avatarUrl         String?        @map("avatar_url")
+  bio               String?
+  role              String         @default("Photographer")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  albums            Album[]
+  likes             Like[]
+  notifications     Notification[] @relation("Recipient")
+  sentNotifications Notification[] @relation("Sender")
+  photos            Photo[]
+  following         Follow[]       @relation("Followers")
+  followers         Follow[]       @relation("Following")
+}
+
+model Album {
+  id        Int      @id @default(autoincrement())
+  profileId String   @map("profile_id")
+  title     String
+  type      String
+  coverUrl  String?  @map("cover_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  photos    Photo[]
+}
+
+model Photo {
+  id           Int      @id @default(autoincrement())
+  albumId      Int      @map("album_id")
+  profileId    String   @map("profile_id")
+  url          String
+  thumbnailUrl String?  @map("thumbnail_url")
+  title        String?
+  isPublic     Boolean  @default(false) @map("is_public")
+  width        Int?
+  height       Int?
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+  likes        Like[]
+  album        Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  profile      Profile  @relation(fields: [profileId], references: [id])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  profileId String   @map("profile_id")
+  photoId   Int      @map("photo_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  photo     Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, photoId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  profileId String   @map("profile_id")
+  actorId   String?  @map("actor_id")
+  targetId  String?  @map("target_id")
+  type      String
+  content   String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  profile   Profile  @relation("Recipient", fields: [profileId], references: [id], onDelete: Cascade)
+  actor     Profile? @relation("Sender", fields: [actorId], references: [id], onDelete: Cascade)
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  follower    Profile  @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   Profile  @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
